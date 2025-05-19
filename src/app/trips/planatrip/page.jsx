@@ -52,7 +52,8 @@ const PlanATrip = () => {
           message: formData.message,
           fullName: user.name,
           email: user.email,
-          phone: user.phone
+          phone: user.phone,
+          type:'New'
         }),
       });
 
