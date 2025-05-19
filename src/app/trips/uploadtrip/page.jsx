@@ -32,8 +32,8 @@ const UploadTrip = () => {
     const file = e.target.files[0];
     setVideo(file);
   };
-  const token = JSON.parse(localStorage.getItem('startourism'));
   const handleSubmit = async (e) => {
+    const token = JSON.parse(localStorage.getItem('startourism'));
     e.preventDefault();
     setLoading(true);
     const formData = new FormData();

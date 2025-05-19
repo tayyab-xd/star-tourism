@@ -13,8 +13,9 @@ const SingleTrip = () => {
   const params = useParams();
   const context = useContext(AppContext);
   const trip = context.state.allTrips.find((item) => item._id === params.id);
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('startourism')) : null;
+
   const handleApply = async () => {
+    const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('startourism')) : null;
     setLoading(true);
     if (user) {
       const formData = new FormData();
@@ -62,6 +63,7 @@ const SingleTrip = () => {
   };
 
   const deleteFunc = async () => {
+    const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('startourism')) : null;
     const res = await fetch(`/api/trips/delete-trip/${trip._id}`, {
       method: 'DELETE',
       headers: {

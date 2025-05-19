@@ -24,7 +24,6 @@ const EditTrip = () => {
   });
   const [newImages, setNewImages] = useState([]);
   const [video, setVideo] = useState(null);
-  const token=JSON.parse(localStorage.getItem('startourism'))
   useEffect(() => {
     const data = context?.state?.allTrips?.find((item) => item._id == id);
     if (data) {
@@ -41,6 +40,7 @@ const EditTrip = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token=JSON.parse(localStorage.getItem('startourism'))
     setLoading(true);
     const formData = new FormData();
     formData.append('name', form.name);
