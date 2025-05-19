@@ -93,7 +93,7 @@ const SingleTrip = () => {
         </div>
       )}
 
-      {user && context.state.profileData.role === 'admin' && (
+      {context.state.profileData.role === 'admin' && (
         <div>
           <Link href={`/trips/edit-trip/${trip && trip._id}`}>
             <button
