@@ -21,22 +21,90 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
-        <h2 className="text-xl font-semibold mb-4">Sign Up</h2>
-        <input type="text" name="name" placeholder="Name" onChange={handleChange} required className="input" />
-        <input type="text" name="phone" placeholder="phone" onChange={handleChange} required className="input" />
-        <input type="email" name="email" placeholder="Email" onChange={handleChange} required className="input" />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} required className="input" />
-        <button type="submit" className="btn">Create Account</button>
-        <button
-          type="button"
-          className="btn mt-2 w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-          onClick={() => router.push('/login')}
-        >
-          Go to Login
-        </button>
-      </form>
-    </main>
+    <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+  <form
+    onSubmit={handleSubmit}
+    className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 sm:p-10 w-full max-w-md space-y-6 transition-all duration-300"
+  >
+    <h2 className="text-3xl font-extrabold text-center text-gray-900 dark:text-white">
+      Create an Account
+    </h2>
+
+    <div>
+      <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+        Full Name
+      </label>
+      <input
+        type="text"
+        name="name"
+        id="name"
+        onChange={handleChange}
+        required
+        placeholder="Enter your name"
+        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition duration-300"
+      />
+    </div>
+
+    <div>
+      <label htmlFor="phone" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+        Phone Number
+      </label>
+      <input
+        type="text"
+        name="phone"
+        id="phone"
+        onChange={handleChange}
+        required
+        placeholder="Enter your phone"
+        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition duration-300"
+      />
+    </div>
+
+    <div>
+      <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+        Email Address
+      </label>
+      <input
+        type="email"
+        name="email"
+        id="email"
+        onChange={handleChange}
+        required
+        placeholder="Enter your email"
+        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition duration-300"
+      />
+    </div>
+
+    <div>
+      <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+        Password
+      </label>
+      <input
+        type="password"
+        name="password"
+        id="password"
+        onChange={handleChange}
+        required
+        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition duration-300"
+      />
+    </div>
+
+    <button
+      type="submit"
+      className="w-full py-3 mt-2 bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white font-semibold rounded-xl transition duration-300"
+    >
+      Create Account
+    </button>
+
+    <button
+      type="button"
+      onClick={() => router.push('/login')}
+      className="w-full py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold rounded-xl transition duration-300"
+    >
+      Already have an account? Login
+    </button>
+  </form>
+</main>
+
   );
 }
