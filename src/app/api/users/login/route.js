@@ -22,8 +22,7 @@ export async function POST(req) {
     // For now just return user data (no JWT/session yet)
     const token = jwt.sign(
       { id: user._id,name:user.name, email: user.email , phone:user.phone , role:user.role },
-      process.env.JWT_TOKEN,
-      { expiresIn: '7d' }
+      process.env.JWT_TOKEN
     );
 
     return Response.json({

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
-// import axios from 'axios';
+import imageCompression from 'browser-image-compression';
 
 const UploadTrip = () => {
   const [tripData, setTripData] = useState({
@@ -20,22 +20,42 @@ const UploadTrip = () => {
     setTripData({ ...tripData, [name]: value });
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    setImages((prevImages) => [...prevImages, ...files]);
+    const compressedImages = [];
+    const previews = [];
 
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setImagePreviews((prevPreviews) => [...prevPreviews, ...previews]);
+    for (let file of files) {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+
+      try {
+        const compressedFile = await imageCompression(file, options);
+        compressedImages.push(compressedFile);
+        const previewUrl = URL.createObjectURL(compressedFile);
+        previews.push(previewUrl);
+      } catch (error) {
+        console.error('Image compression failed:', error);
+      }
+    }
+
+    setImages((prev) => [...prev, ...compressedImages]);
+    setImagePreviews((prev) => [...prev, ...previews]);
   };
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     setVideo(file);
   };
+
   const handleSubmit = async (e) => {
     const token = JSON.parse(localStorage.getItem('startourism'));
     e.preventDefault();
     setLoading(true);
+
     const formData = new FormData();
     formData.append('name', tripData.name);
     formData.append('duration', tripData.duration);
@@ -51,12 +71,13 @@ const UploadTrip = () => {
     }
 
     await fetch('/api/trips/upload-trip', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token.token}`
-          },
-          body: formData,
-        });
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.token}`,
+      },
+      body: formData,
+    });
+
     setLoading(false);
   };
 

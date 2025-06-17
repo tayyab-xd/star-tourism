@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { AppContext } from '@/app/context/context';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
 
 const SingleTrip = () => {
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,7 @@ const SingleTrip = () => {
       },
     })
   }
-
+  
   return (
     <div className="single-trip min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-4 sm:px-10 transition-colors duration-500">
       <ToastContainer />

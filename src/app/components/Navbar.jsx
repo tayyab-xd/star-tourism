@@ -28,8 +28,7 @@ const Navbar = () => {
   }, [checkLogin]);
 
   const navLinkClass = (href) =>
-    `transition duration-300 ease-in-out ${
-      pathname === href ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-700 dark:text-gray-200'
+    `transition duration-300 ease-in-out ${pathname === href ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-700 dark:text-gray-200'
     } hover:text-blue-600 dark:hover:text-blue-400`;
 
   return (
@@ -58,7 +57,7 @@ const Navbar = () => {
           <Link href="/trips/all-trips" className={navLinkClass('/trips')}>All Trips</Link>
           <Link href="/trips/planatrip" className={navLinkClass('/planatrip')}>Plan a Trip</Link>
 
-          
+
 
           {login ? (
             <button
@@ -87,33 +86,85 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-800 px-6 py-4 shadow-lg space-y-4">
+        <div className="md:hidden bg-white dark:bg-gray-800 px-6 py-4 shadow-lg flex flex-col space-y-4">
           {checkLogin?.role === 'admin' && (
             <>
-              <Link href="/trips/uploadtrip" onClick={() => setMenuOpen(false)} className={navLinkClass('/uploadtrip')}>Upload Trip</Link>
-              <Link href="/applications" onClick={() => setMenuOpen(false)} className={navLinkClass('/applications')}>Applications</Link>
+              <Link
+                href="/trips/uploadtrip"
+                className={navLinkClass('/trips/uploadtrip')}
+                onClick={() => setMenuOpen(false)}
+              >
+                Upload Trip
+              </Link>
+              <Link
+                href="/applications"
+                className={navLinkClass('/applications')}
+                onClick={() => setMenuOpen(false)}
+              >
+                Applications
+              </Link>
             </>
           )}
+
           {checkLogin?.email && (
-            <Link href="/profile" onClick={() => setMenuOpen(false)} className={navLinkClass('/profile')}>Profile</Link>
+            <Link
+              href="/profile"
+              className={navLinkClass('/profile')}
+              onClick={() => setMenuOpen(false)}
+            >
+              Profile
+            </Link>
           )}
-          <Link href="/" onClick={() => setMenuOpen(false)} className={navLinkClass('/')}>Home</Link>
-          <Link href="/trips/all-trips" onClick={() => setMenuOpen(false)} className={navLinkClass('/trips')}>All Trips</Link>
-          <Link href="/trips/planatrip" onClick={() => setMenuOpen(false)} className={navLinkClass('/planatrip')}>Plan a Trip</Link>
-          
+
+          <Link
+            href="/"
+            className={navLinkClass('/')}
+            onClick={() => setMenuOpen(false)}
+          >
+            Home
+          </Link>
+
+          <Link
+            href="/trips/all-trips"
+            className={navLinkClass('/trips/all-trips')}
+            onClick={() => setMenuOpen(false)}
+          >
+            All Trips
+          </Link>
+
+          <Link
+            href="/trips/planatrip"
+            className={navLinkClass('/trips/planatrip')}
+            onClick={() => setMenuOpen(false)}
+          >
+            Plan a Trip
+          </Link>
+
           {login ? (
-            <button onClick={handleLogout} className="text-red-600 hover:text-red-700 w-full text-left transition duration-300">
+            <button
+              onClick={() => {
+                handleLogout();
+                setMenuOpen(false);
+              }}
+              className="text-red-600 hover:text-red-700 w-full text-left transition duration-300"
+            >
               Logout
             </button>
           ) : (
-            <Link href="/signup" onClick={() => setMenuOpen(false)} className="block text-blue-600 hover:text-blue-700 transition duration-300">
-              Login/SignUp
+            <Link
+              href="/signup"
+              className="block text-blue-600 hover:text-blue-700 transition duration-300"
+              onClick={() => setMenuOpen(false)}
+            >
+              Login / SignUp
             </Link>
           )}
         </div>
       )}
+
     </nav>
   );
+
 };
 
 export default Navbar;

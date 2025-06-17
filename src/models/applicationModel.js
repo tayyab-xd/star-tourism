@@ -10,7 +10,7 @@ const applicationSchema = new mongoose.Schema({
     email:String,
     phone:String,
     tripName:String,
-    type:String,
+    pickUp:String,
     tripType: {
         type: Array,
     },

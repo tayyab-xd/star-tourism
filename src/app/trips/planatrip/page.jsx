@@ -11,6 +11,7 @@ const PlanATrip = () => {
     persons: '',
     tripType: [],
     message: '',
+    pickUp: '',
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -53,6 +54,7 @@ const PlanATrip = () => {
           fullName: user.name,
           email: user.email,
           phone: user.phone,
+          pickUp: user.pickUp,
           type:'New'
         }),
       });
@@ -118,6 +120,17 @@ const PlanATrip = () => {
             type="text"
             name="days"
             value={formData.days}
+            onChange={handleChange}
+            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Pickup Point:</label>
+          <input
+            required
+            type="text"
+            name="pickUp"
+            value={formData.pickUp}
             onChange={handleChange}
             className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />

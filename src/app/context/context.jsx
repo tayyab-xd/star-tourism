@@ -49,6 +49,9 @@ const AppProvider = ({ children }) => {
   //for application
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem('startourism'));
+    if (!token) {
+      return
+    }
     const fetchApplications = async () => {
       const res = await fetch(`/api/applications`, {
         method: 'GET',
