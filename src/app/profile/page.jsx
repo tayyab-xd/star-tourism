@@ -1,109 +1,148 @@
 'use client'
-import React, { useContext, useState } from 'react';
-import { AppContext } from '../context/context';
-// import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { User, Phone, Mail, Edit3, Save } from 'lucide-react';
 
+// --- Reusable Components ---
+const ModernButton = ({ children, onClick, type = 'button', disabled = false, variant = 'primary', className = '' }) => {
+    const baseStyles = `w-full px-6 py-3 font-semibold rounded-xl shadow-md transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2`;
+    const variants = {
+        primary: `bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-800 ${disabled ? 'bg-gray-400 cursor-not-allowed' : ''}`,
+        ghost: `bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-400 shadow-sm`,
+    };
+    return <button type={type} onClick={onClick} disabled={disabled} className={`${baseStyles} ${variants[variant]} ${className}`}>{children}</button>;
+};
+
+// --- Main Profile Page ---
 function Profile() {
-  const [edit, setEdit] = useState(false);
-  const context = useContext(AppContext);
-  const data = context.state.profileData;
+    const [edit, setEdit] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState(null);
 
-  const [formData, setFormData] = useState({
-    name: data?.name || '',
-    phone: data?.phone || '',
-    email: data?.email || '',
-  });
+    const [formData, setFormData] = useState({
+        name: '',
+        phone: '',
+        email: '',
+    });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+    // ✅ Load localStorage data only on client
+    useEffect(() => {
+        const stored = localStorage.getItem('startourism');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            setData(parsed);
+            setFormData({
+                name: parsed.name || '',
+                phone: parsed.phone || '',
+                email: parsed.email || '',
+            });
+        }
+    }, []);
 
-  const handleSave = async () => {
-    try {
-      const response = await axios.put(`http://localhost:3000/user/update-user/${data._id}`, formData);
-      if (response.status === 200) {
-        toast.success('Profile updated successfully!');
-        setEdit(false);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to update, Please try again.');
-    }
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
 
-  return (
-    <div className="profile-container min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-4 sm:px-10 transition-colors duration-500">
-      <ToastContainer />
-      <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">
-        Profile
-      </h2>
-      <div className="profile-card max-w-lg mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 transition-all duration-300">
-        {edit ? (
-          <>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 mb-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Phone:</label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-4 py-2 mb-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 mb-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="flex justify-between">
-              <button
-                className="save-button bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition duration-300"
-                onClick={handleSave}
-              >
-                Save
-              </button>
-              <button
-                className="cancel-button bg-red-600 text-white px-4 py-2 rounded-md shadow hover:bg-red-700 transition duration-300"
-                onClick={() => setEdit(false)}
-              >
-                Cancel
-              </button>
+    const handleSave = async () => {
+        if (!data) return;
+        setLoading(true);
+        try {
+            const token = data?.token;
+            await axios.put(`http://localhost:3000/user/update-user/${data._id}`, formData, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            // ✅ Update localStorage with new data
+            const updated = { ...data, ...formData };
+            localStorage.setItem('startourism', JSON.stringify(updated));
+            setData(updated);
+
+            toast.success('Profile updated successfully!');
+            setEdit(false);
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to update. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const inputClasses = "w-full px-4 py-3 bg-gray-100 rounded-xl border-2 border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-800 transition-all duration-300";
+
+    if (!data) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-gray-600">Loading profile...</p>
             </div>
-          </>
-        ) : (
-          <>
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-2">
-              Name: <span className="font-normal">{data?.name}</span>
-            </h3>
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-2">
-              Phone: <span className="font-normal">{data?.phone}</span>
-            </h3>
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-4">
-              Email: <span className="font-normal">{data?.email}</span>
-            </h3>
-            <button
-              className="edit-button bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition duration-300"
-              onClick={() => setEdit(true)}
-            >
-              Edit
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
+        );
+    }
+
+    return (
+        <div className="min-h-screen font-sans bg-gray-50 text-gray-800 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+            <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
+            
+            <div className="w-full max-w-lg animate-fade-in-up">
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Your Profile</h1>
+                    <p className="max-w-md mx-auto mt-4 text-lg text-gray-500">View and manage your personal information.</p>
+                </div>
+                
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <div className="p-8 flex flex-col items-center border-b border-gray-200">
+                        <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center text-white text-4xl font-bold mb-4">
+                            {data?.name ? data.name.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        {edit ? (
+                            <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Your Name" className={`${inputClasses} text-center text-2xl font-bold`}/>
+                        ) : (
+                            <h2 className="text-2xl font-bold text-gray-900">{data?.name}</h2>
+                        )}
+                         {edit ? (
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Your Email" className={`${inputClasses} text-center mt-2`}/>
+                        ) : (
+                             <p className="text-gray-500 mt-1">{data?.email}</p>
+                        )}
+                    </div>
+                    
+                    <div className="p-8 space-y-6">
+                        <div>
+                            <label className="flex items-center gap-3 text-sm font-medium text-gray-600 mb-2">
+                                <Phone size={16}/>
+                                <span>Phone Number</span>
+                            </label>
+                            {edit ? (
+                                <input type="text" name="phone" value={formData.phone} onChange={handleChange} placeholder="Your Phone Number" className={inputClasses}/>
+                            ) : (
+                                <p className="text-lg text-gray-800 font-medium ml-8">{data?.phone || 'Not provided'}</p>
+                            )}
+                        </div>
+                        
+                        <div className="pt-6">
+                            {edit ? (
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <ModernButton onClick={handleSave} disabled={loading} variant="primary">
+                                        <Save size={18}/>
+                                        {loading ? 'Saving...' : 'Save Changes'}
+                                    </ModernButton>
+                                    <ModernButton onClick={() => setEdit(false)} variant="ghost">
+                                        Cancel
+                                    </ModernButton>
+                                </div>
+                            ) : (
+                                <ModernButton onClick={() => setEdit(true)} variant="primary">
+                                    <Edit3 size={18}/>
+                                    Edit Profile
+                                </ModernButton>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export default Profile;

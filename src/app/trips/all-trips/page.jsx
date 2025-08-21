@@ -2,58 +2,72 @@
 import React, { useContext } from 'react';
 import { AppContext } from '@/app/context/context';
 import Link from 'next/link';
+import { Compass } from 'lucide-react';
+
+// --- Reusable Trip Card Component ---
+const TripCard = ({ trip }) => {
+    const { _id, name, description, images } = trip;
+
+    return (
+        <Link href={`/trips/all-trips/${_id}`} className="block group">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden h-full flex flex-col transform hover:scale-[1.03] hover:shadow-xl transition-all duration-400 ease-in-out">
+                {/* Image Container */}
+                <div className="w-full h-64 overflow-hidden">
+                    <img
+                        src={images[0]}
+                        alt={name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
+                    />
+                </div>
+                
+                {/* Content Container */}
+                <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">{name}</h3>
+                    <p className="text-gray-500 text-sm mb-6 flex-grow">
+                        {description.slice(0, 100)}{description.length > 100 && '...'}
+                    </p>
+                    <div className="mt-auto">
+                         <div className="bg-gray-800 text-white text-center font-semibold rounded-xl py-3 w-full transform group-hover:-translate-y-1 transition-transform duration-300 ease-in-out">
+                            View Details
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Link>
+    );
+};
+
 
 const Trips = () => {
   const context = useContext(AppContext);
-  const alltrips = context.state.allTrips;
+  const alltrips = context?.state?.allTrips || [];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-4 sm:px-10 transition-colors duration-500">
-      <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-10">
-        Explore Our Tour Packages
-      </h2>
-
-      <div className="destination-grid grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {alltrips && alltrips.map(item => (
-          <div
-            key={item._id}
-            className="destination-card bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden relative group"
-          >
-            <Link href={`/trips/all-trips/${item._id}`}>
-              {/* Image */}
-              <div className="relative h-96 w-full overflow-hidden rounded-t-2xl">
-                <img
-                  src={item.images[0]}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Name: Centered in the middle */}
-              <h3
-                className="absolute inset-0 flex items-center justify-center text-amber-500 text-3xl font-semibold z-10 group-hover:translate-y-[-10%] transition-transform duration-500"
-              >
-                {item.name}
-              </h3>
-
-              {/* Description and Button: Hidden by default and will slide up on hover */}
-              <div
-                className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black to-transparent rounded-b-2xl z-0 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500"
-              >
-                <p className="text-white mb-2">
-                  {item.description.length > 100
-                    ? item.description.substring(0, 100) + '...'
-                    : item.description}
+    <div className="min-h-screen font-sans bg-gray-50 text-gray-800 p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto">
+            <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Explore Our Trips</h1>
+                <p className="max-w-2xl mx-auto mt-4 text-lg text-gray-500">
+                    Discover unforgettable destinations and create memories that will last a lifetime.
                 </p>
-                <button
-                  className="view-button text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 rounded-full px-4 py-2 transition-colors duration-300"
-                >
-                  View Details
-                </button>
-              </div>
-            </Link>         </div>
-        ))}
-      </div>
+            </div>
+
+            {alltrips.length > 0 ? (
+                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {alltrips.map((trip, index) => (
+                    <div key={trip._id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                        <TripCard trip={trip} />
+                    </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-16">
+                    <Compass size={48} className="mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-700">No Trips Available</h3>
+                    <p className="text-gray-500 mt-2">Please check back later for new and exciting destinations!</p>
+                </div>
+            )}
+        </div>
     </div>
   );
 };

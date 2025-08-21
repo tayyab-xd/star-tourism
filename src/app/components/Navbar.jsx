@@ -1,170 +1,274 @@
 'use client';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { AppContext } from '../context/context';
-import { FaBars, FaTimes, FaUserCircle, FaSignOutAlt, FaSignInAlt, FaMoon, FaSun } from 'react-icons/fa';
+import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Menu,
+  X,
+  User,
+  LogOut,
+  LogIn,
+  Compass,
+  Plane,
+  FilePlus,
+  ClipboardList,
+} from 'lucide-react';
 
 const Navbar = () => {
   const pathname = usePathname();
-  const context = useContext(AppContext);
-  const checkLogin = context?.state?.profileData;
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [login, setLogin] = useState(false);
+  const router = useRouter();
+
+  const [isMenuOpen, setMenuOpen] = useState(false);
+  const [isProfileOpen, setProfileOpen] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [profileData, setProfileData] = useState(null);
+
+  const profileRef = useRef(null);
+
+  // Load user data from localStorage
+  useEffect(() => {
+    const fetchUser = async () => {
+      const storedUser = JSON.parse(localStorage.getItem('startourism'));
+      if (!storedUser) {
+        setLoadingProfile(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/users/getuser/${storedUser.userId}`);
+        const data = await res.json();
+        setProfileData(data);
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const isLoggedIn = !loadingProfile && !!profileData;
+  const isAdmin = profileData?.role === 'admin';
+  const userName = profileData?.name || 'User';
 
   const handleLogout = () => {
     localStorage.removeItem('startourism');
-    context.dispatch({ type: 'PROFILE_CLEAR' });
-    setLogin(false);
+    setProfileData(null);
+    setProfileOpen(false);
     setMenuOpen(false);
+    router.push('/signup');
   };
 
+  // Close dropdown on outside click
   useEffect(() => {
-    const storedData = localStorage.getItem('startourism');
-    if (storedData) {
-      setLogin(true);
-    }
-  }, [checkLogin]);
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const navLinkClass = (href) =>
-    `transition duration-300 ease-in-out ${pathname === href ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-700 dark:text-gray-200'
-    } hover:text-blue-600 dark:hover:text-blue-400`;
+  const navLinks = [
+    { href: '/', text: 'Home', icon: <Compass /> },
+    { href: '/trips/all-trips', text: 'All Trips', icon: <Plane /> },
+    { href: '/trips/planatrip', text: 'Plan a Trip', icon: <FilePlus /> },
+  ];
+
+  const adminLinks = [
+    { href: '/trips/uploadtrip', text: 'Upload Trip', icon: <FilePlus /> },
+    { href: '/allapplications', text: 'Applications', icon: <ClipboardList /> },
+  ];
+
+  const activeLinkClass = 'bg-gray-100 text-gray-900';
+  const inactiveLinkClass =
+    'text-gray-500 hover:bg-gray-100 hover:text-gray-900';
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-blue-600 flex items-center gap-2 dark:text-blue-400">
-          <img className="h-20" src="/logo.png" alt="Star Tourism" />
-        </Link>
+    <nav className="sticky top-0 z-50 bg-white shadow-sm font-sans">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0">
+            <img className="h-16 w-auto" src="/logo.png" alt="Star Tourism" />
+          </Link>
 
-        {/* Desktop Nav Links */}
-        <div className="hidden md:flex items-center gap-6">
-          {checkLogin?.role === 'admin' && (
-            <>
-              <Link href="/trips/uploadtrip" className={navLinkClass('/uploadtrip')}>Upload Trip</Link>
-              <Link href="/allapplications" className={navLinkClass('/applications')}>Applications</Link>
-            </>
-          )}
-          {checkLogin?.email && (
-            <Link href="/profile" className={`${navLinkClass('/profile')} flex items-center gap-1`}>
-              <FaUserCircle /> Profile
-            </Link>
-          )}
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center space-x-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 ${
+                  pathname === link.href ? activeLinkClass : inactiveLinkClass
+                }`}
+              >
+                {link.text}
+              </Link>
+            ))}
+            {isAdmin &&
+              adminLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 ${
+                    pathname === link.href ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  {link.text}
+                </Link>
+              ))}
+          </div>
 
-          <Link href="/" className={navLinkClass('/')}>Home</Link>
-          <Link href="/trips/all-trips" className={navLinkClass('/trips')}>All Trips</Link>
-          <Link href="/trips/planatrip" className={navLinkClass('/planatrip')}>Plan a Trip</Link>
+          {/* Profile / Auth Buttons */}
+          <div className="flex items-center space-x-4">
+            {loadingProfile ? (
+              <div className="w-24 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+            ) : isLoggedIn ? (
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen(!isProfileOpen)}
+                  className="flex items-center space-x-2 bg-white rounded-full p-1 pr-3 hover:bg-gray-100 transition-colors border border-gray-200"
+                >
+                  <div className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold text-base">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden sm:inline text-sm font-semibold text-gray-800">
+                    {userName}
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 origin-top-right"
+                    >
+                      <div className="p-2">
+                        <div className="px-4 py-2 mb-1">
+                          <p className="text-sm font-semibold text-gray-900">
+                            {userName}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {profileData?.email}
+                          </p>
+                        </div>
+                        <div className="border-t my-1 border-gray-200"></div>
+                        <Link
+                          href="/profile"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-100"
+                        >
+                          <User size={16} className="mr-3" /> Profile
+                        </Link>
+                        <div className="border-t my-1 border-gray-200"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 rounded-lg hover:bg-red-50"
+                        >
+                          <LogOut size={16} className="mr-3" /> Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center space-x-2">
+                <Link
+                  href="/signup"
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-800 text-white hover:bg-gray-900"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
 
-
-
-          {login ? (
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1 text-red-600 hover:text-red-700 transition duration-300"
-            >
-              <FaSignOutAlt /> Logout
-            </button>
-          ) : (
-            <Link
-              href="/signup"
-              className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 transition duration-300"
-            >
-              <FaSignInAlt /> Login/SignUp
-            </Link>
-          )}
-        </div>
-
-        {/* Mobile Hamburger Icon */}
-        <div className="md:hidden">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-2xl">
-            {menuOpen ? <FaTimes /> : <FaBars />}
-          </button>
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setMenuOpen(!isMenuOpen)}
+                className="p-2 text-gray-600 rounded-lg hover:bg-gray-100"
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-800 px-6 py-4 shadow-lg flex flex-col space-y-4">
-          {checkLogin?.role === 'admin' && (
-            <>
-              <Link
-                href="/trips/uploadtrip"
-                className={navLinkClass('/trips/uploadtrip')}
-                onClick={() => setMenuOpen(false)}
-              >
-                Upload Trip
-              </Link>
-              <Link
-                href="/applications"
-                className={navLinkClass('/applications')}
-                onClick={() => setMenuOpen(false)}
-              >
-                Applications
-              </Link>
-            </>
-          )}
-
-          {checkLogin?.email && (
-            <Link
-              href="/profile"
-              className={navLinkClass('/profile')}
-              onClick={() => setMenuOpen(false)}
-            >
-              Profile
-            </Link>
-          )}
-
-          <Link
-            href="/"
-            className={navLinkClass('/')}
-            onClick={() => setMenuOpen(false)}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="md:hidden bg-white border-t border-gray-100"
           >
-            Home
-          </Link>
+            <div className="px-4 pt-4 pb-6 space-y-2">
+              {[...navLinks, ...(isAdmin ? adminLinks : [])].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold ${
+                    pathname === link.href ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  {link.icon}
+                  {link.text}
+                </Link>
+              ))}
 
-          <Link
-            href="/trips/all-trips"
-            className={navLinkClass('/trips/all-trips')}
-            onClick={() => setMenuOpen(false)}
-          >
-            All Trips
-          </Link>
-
-          <Link
-            href="/trips/planatrip"
-            className={navLinkClass('/trips/planatrip')}
-            onClick={() => setMenuOpen(false)}
-          >
-            Plan a Trip
-          </Link>
-
-          {login ? (
-            <button
-              onClick={() => {
-                handleLogout();
-                setMenuOpen(false);
-              }}
-              className="text-red-600 hover:text-red-700 w-full text-left transition duration-300"
-            >
-              Logout
-            </button>
-          ) : (
-            <Link
-              href="/signup"
-              className="block text-blue-600 hover:text-blue-700 transition duration-300"
-              onClick={() => setMenuOpen(false)}
-            >
-              Login / SignUp
-            </Link>
-          )}
-        </div>
-      )}
-
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                {isLoggedIn ? (
+                  <div className="space-y-2">
+                    <Link
+                      href="/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold ${
+                        pathname === '/profile'
+                          ? activeLinkClass
+                          : inactiveLinkClass
+                      }`}
+                    >
+                      <User /> Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut /> Logout
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/signup"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-center gap-3 px-4 py-3 rounded-lg text-base font-semibold bg-gray-800 text-white hover:bg-gray-900"
+                  >
+                    <LogIn /> Login / Sign Up
+                  </Link>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
-
 };
 
 export default Navbar;

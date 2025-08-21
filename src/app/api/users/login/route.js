@@ -30,6 +30,7 @@ export async function POST(req) {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        role:user.role,
         token
     }, { status: 200 });
 
